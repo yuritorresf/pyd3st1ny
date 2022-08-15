@@ -79,8 +79,7 @@ def main():
         print("\n [-] Packets:\n ---------------------------------")
         
         while True:
-            capture = pyshark.LiveCapture(interface=interface_target)
-            capture.sniff(timeout=10)
+            capture = pyshark.LiveCapture(interface_target, bpf_filter="udp")
             for packet in capture.sniff_continuously(packet_count=10):
                 packet_counter += 1
                 try:
