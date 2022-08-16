@@ -1,5 +1,5 @@
 from scapy.all import *
-import time, os, netifaces, psutil, pyshark
+import time, os, netifaces, psutil, pyshark, socket
 
 def default_gateway_info():
     gateways = netifaces.gateways()
@@ -71,16 +71,18 @@ def main():
         for interface in interfaces_names:
             print(" [+] {}".format(interface))
         print(" ---------------------------------\n")
-
+        
         interface_target = input("\n [=] Enter target interface: ")
-        target_ip = input("\n [=] Enter target IP: ")
-
+        target_ip = input("\n [=] Enter target IP | default({}): ".format(get_if_addr(conf.iface)))
+        if target_ip == "":
+            target_ip = socket.gethostbyname(socket.gethostname())
+        
         packet_counter = 0
         print("\n [-] Packets:\n ---------------------------------")
         
         while True:
-            capture = pyshark.LiveCapture(interface_target, bpf_filter="udp")
-            for packet in capture.sniff_continuously(packet_count=10):
+            capture = pyshark.LiveCapture(interface_target)
+            for packet in capture.sniff_continuously(packet_count=1):
                 packet_counter += 1
                 try:
                     if packet.ip.src == target_ip or packet.ip.dst == target_ip:
